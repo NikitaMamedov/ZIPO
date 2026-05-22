@@ -1,12 +1,12 @@
 spring:
   datasource:
-    url: ${PG_URL}
-    username: ${PG_USER}
-    password: ${PG_PASS}
-sql:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  sql:
     init:
       mode: always
-jpa:
+  jpa:
     hibernate:
       ddl-auto: none
 
@@ -14,7 +14,11 @@ server:
   port: 8080
   ssl:
     enabled: true
-    key-store: classpath:ssl/hotel-1bib23427.p12
+    key-store: classpath:ssl/quiz.p12
     key-store-type: PKCS12
     key-store-password: ${TLS_KEYSTORE_PASSWORD}
-    key-alias: hotel-1bib23427
+    key-alias: quiz
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000
