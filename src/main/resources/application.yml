@@ -16,3 +16,9 @@ server:
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000
+signature:
+  key-store-path: classpath:ssl/signing.jks
+  key-store-type: JKS
+  key-store-password: changeit
+  key-alias: signing
+  key-password: changeit
