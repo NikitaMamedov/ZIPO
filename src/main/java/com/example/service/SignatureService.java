@@ -30,4 +30,14 @@ public class SignatureService {
             throw new RuntimeException("Error while signing ticket", e);
         }
     }
+    public byte[] signBytes(byte[] data) {
+        try {
+            Signature signer = Signature.getInstance("SHA256withRSA");
+            signer.initSign(keyProvider.getPrivateKey());
+            signer.update(data);
+            return signer.sign();
+        } catch (Exception e) {
+            throw new RuntimeException("Error while signing bytes", e);
+        }
+    }
 }
