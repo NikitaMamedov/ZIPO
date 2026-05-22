@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -17,18 +18,20 @@ public class JwtTokenProvider {
 
     private final SecretKey secretKey;
 
-    private final long accessTokenValidityMs = 15 * 60 * 1000L;          // 15 минут
-    private final long refreshTokenValidityMs = 7L * 24 * 60 * 60 * 1000L; // 7 дней
+    private final long accessTokenValidityMs = 15 * 60 * 1000L;
+    private final long refreshTokenValidityMs = 7L * 24 * 60 * 60 * 1000L;
 
-    public JwtTokenProvider() {
-        String secret = System.getenv("PG_SECRET_PASSWORD");
-        if (secret == null || secret.isEmpty()) {
-            throw new IllegalStateException("Environment variable 'PG_SECRET_PASSWORD' is not set");
-        }
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    public JwtTokenProvider(
+            @Value("${jwt.secret}") String secret
+    ) {
+
+        this.secretKey = Keys.hmacShaKeyFor(
+                secret.getBytes(StandardCharsets.UTF_8)
+        );
     }
 
     public String createAccessToken(String username, String role) {
+
         Instant now = Instant.now();
         Instant expiry = now.plusMillis(accessTokenValidityMs);
 
@@ -43,6 +46,7 @@ public class JwtTokenProvider {
     }
 
     public String createRefreshToken(String username, String deviceId) {
+
         Instant now = Instant.now();
         Instant expiry = now.plusMillis(refreshTokenValidityMs);
 
@@ -57,31 +61,46 @@ public class JwtTokenProvider {
     }
 
     public boolean validateAccessToken(String token) {
+
         try {
+
             Claims claims = parseClaims(token);
-            String type = claims.get("tokenType", String.class);
-            return "ACCESS".equals(type);
+
+            return "ACCESS".equals(
+                    claims.get("tokenType", String.class)
+            );
+
         } catch (JwtException | IllegalArgumentException e) {
+
             return false;
         }
     }
 
     public boolean validateRefreshToken(String token) {
+
         try {
+
             Claims claims = parseClaims(token);
-            String type = claims.get("tokenType", String.class);
-            return "REFRESH".equals(type);
+
+            return "REFRESH".equals(
+                    claims.get("tokenType", String.class)
+            );
+
         } catch (JwtException | IllegalArgumentException e) {
+
             return false;
         }
     }
 
     public String getUsernameFromToken(String token) {
+
         return parseClaims(token).getSubject();
     }
 
     public String getRoleFromToken(String token) {
-        return parseClaims(token).get("role", String.class);
+
+        return parseClaims(token)
+                .get("role", String.class);
     }
 
     public long getAccessTokenValidityMs() {
@@ -93,6 +112,7 @@ public class JwtTokenProvider {
     }
 
     private Claims parseClaims(String token) {
+
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()

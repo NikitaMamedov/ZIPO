@@ -1,20 +1,22 @@
-create table if not exists users(
+create table if not exists licenses (
     id bigserial primary key,
-    username varchar(50) not null unique,
-    password varchar(200) not null,
-    role varchar(20) not null
-);
-
-create table if not exists user_sessions(
-    id uuid primary key,
-    username varchar(50) not null,
+    license_key varchar(100) not null unique,
+    user_id bigint not null,
     device_id varchar(100),
-    access_token varchar(512),
-    refresh_token varchar(512),
-    access_token_expiry timestamp,
-    refresh_token_expiry timestamp,
-    status varchar(20)
+    status varchar(20) not null default 'CREATED',
+    created_at timestamp not null default now(),
+    activated_at timestamp,
+    expires_at timestamp not null,
+    max_devices int not null default 1,
+    description varchar(255)
 );
 
-create index if not exists idx_user_sessions_refresh on user_sessions(refresh_token);
-create index if not exists idx_user_sessions_username on user_sessions(username);
+create table if not exists license_history (
+    id bigserial primary key,
+    license_id bigint not null references licenses(id),
+    action varchar(50) not null,
+    device_id varchar(100),
+    ip_address varchar(50),
+    user_agent varchar(255),
+    created_at timestamp not null default now()
+);
